@@ -16,6 +16,20 @@ from io import StringIO
 
 from models import *
 
+
+CONTENT_TYPES = {
+    'json-ld': 'application/json',
+    "json": 'application/json',
+    "yaml": 'text/x-yaml',
+    'turtle': 'text/turtle',
+    'n3': 'text/n3',
+    'nt': 'application/n-triples',
+    'xml': 'application/rdf+xml',
+    #NQuads serialization only makes sense for context-aware stores
+    #'nquads': 'application/n-quads',
+}
+
+        
 def index(request):
     return HttpResponse("Hello, world. You're at the vocab index.")
     
@@ -85,34 +99,18 @@ def get_lod_setup_items():
 
 def agents(request, format='json-ld'):
     agents = Agent.objects.all()
-    if format == "json":
-        json = serializers.serialize("json", agents)
-        return HttpResponse(json, content_type='application/json')
-    if format == "yaml":
-        yaml = serializers.serialize("yaml", agents)
-        return HttpResponse(yaml, content_type='text/x-yaml')
-        
-    path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
-    for agent in agents:
-        ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
-        store.add((ref, RDF.type, vf_ns.Person))
-        store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
-        
-    ser = store.serialize(format=format, context=context, indent=4)
+    if format == "json" or format == "yaml":
+        ser = serializers.serialize(format, agents)
+    else:
+        path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
+        for agent in agents:
+            ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
+            store.add((ref, RDF.type, vf_ns.Person))
+            store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))            
+        ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
-    if format == 'json-ld':
-        return HttpResponse(ser, content_type='application/json')
-    if format == 'turtle':
-        return HttpResponse(ser, content_type='text/turtle')
-    if format == 'n3':
-        return HttpResponse(ser, content_type='text/n3')
-    if format == 'nt':
-        #downloads, does not display
-        return HttpResponse(ser, content_type='application/n-triples')
-    if format == 'xml':
-        #downloads, does not display
-        return HttpResponse(ser, content_type='application/rdf+xml')
-    #NQuads serialization only makes sense for context-aware stores
-    #if format == 'nquads':
-    #    return HttpResponse(ser, content_type='application/n-quads')
+    content_type = CONTENT_TYPES[format]
+    return HttpResponse(ser, content_type=content_type)
+    
+
         

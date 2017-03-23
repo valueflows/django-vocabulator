@@ -14,3 +14,4 @@ cmd/create-user.sh
 include/
 lib/
 *.json
+manage.py
