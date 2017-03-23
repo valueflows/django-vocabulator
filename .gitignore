@@ -1,0 +1,16 @@
+*.pyc
+local_settings.py
+*.sqlite*
+*.py~
+*.*~
+*.html~
+*~
+*.swp
+*.swo
+*.log
+.vagrant
+bin/
+cmd/create-user.sh
+include/
+lib/
+*.json
