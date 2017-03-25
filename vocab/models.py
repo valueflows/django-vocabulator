@@ -22,8 +22,8 @@ class VocabBase(models.Model):
 
 
 AGENT_SUBCLASS_OPTIONS = (
-    ('person', _('Person')),
-    ('organization', _('Organization')),
+    ('Person', _('Person')),
+    ('Organization', _('Organization')),
 )
 
 
@@ -39,7 +39,7 @@ class Agent(VocabBase):
     note = models.TextField(_('note'), blank=True, null=True)
     agent_subclass =  models.CharField(_('subclass'),
         max_length=16, choices=AGENT_SUBCLASS_OPTIONS,
-        default='person')
+        default='Person')
         
     created_by = models.ForeignKey(User,
         blank=True, null=True, 
@@ -88,10 +88,10 @@ class AgentRelationship(VocabBase):
     """
     subject = models.ForeignKey(Agent,
         verbose_name=_('subject'), related_name="subject_relationships")
-    object = models.ForeignKey(Agent,
-        verbose_name=_('object'), related_name="object_relationships")
     relationship = models.ForeignKey(AgentRelationshipRole,
         verbose_name=_('relationship'), related_name="relationships")
+    object = models.ForeignKey(Agent,
+        verbose_name=_('object'), related_name="object_relationships")    
     context = models.ForeignKey(Agent,
         blank=True, null=True,
         verbose_name=_('context'), related_name="context_relationships")

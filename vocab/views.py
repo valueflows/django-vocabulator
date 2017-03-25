@@ -58,7 +58,7 @@ def get_lod_setup_items():
         "Agent": "vf:Agent",
         "Person": "vf:Person",
         "Group": "vf:Group",
-        #"Organization": "vf:Organization",
+        "Organization": "vf:Organization",
         "url":  { "@id": "vf:url", "@type": "@id" },
         "image": { "@id": "vf:image", "@type": "@id" },
         #"displayName": "vf:displayName",
@@ -105,12 +105,26 @@ def agents(request, format='json-ld'):
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
         for agent in agents:
             ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
-            store.add((ref, RDF.type, vf_ns.Person))
+            if agent.agent_subclass == "Person":
+                store.add((ref, RDF.type, vf_ns.Person))
+            elif agent.agent_subclass == "Organization":
+                store.add((ref, RDF.type, vf_ns.Organization))
             store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))            
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
     return HttpResponse(ser, content_type=content_type)
     
-
-        
+def agentrelationships(request, format='json-ld'):
+    rellies = AgentRelationship.objects.all()
+    if format == "json" or format == "yaml":
+        ser = serializers.serialize(format, rellies)
+    else:
+        path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
+        for rel in rellies:
+            ref = URIRef(instance_abbrv + ":agentrelationship/" + str(rel.id) + "/")
+            store.add((ref, vf_ns["label"], Literal(rel.__str__(), lang="en")))            
+        ser = store.serialize(format=format, context=context, indent=4)
+    #import pdb; pdb.set_trace()
+    content_type = CONTENT_TYPES[format]
+    return HttpResponse(ser, content_type=content_type)
