@@ -116,14 +116,29 @@ def agents(request, format='json-ld'):
     return HttpResponse(ser, content_type=content_type)
     
 def agentrelationships(request, format='json-ld'):
-    rellies = AgentRelationship.objects.all()
+    associations = AgentRelationship.objects.all()
     if format == "json" or format == "yaml":
-        ser = serializers.serialize(format, rellies)
+        ser = serializers.serialize(format, associations)
     else:
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
-        for rel in rellies:
-            ref = URIRef(instance_abbrv + ":agentrelationship/" + str(rel.id) + "/")
-            store.add((ref, vf_ns["label"], Literal(rel.__str__(), lang="en")))            
+        for a in associations:
+            ref = URIRef(instance_abbrv + ":agent-relationship/" + str(a.id) + "/")
+            inv_ref = URIRef(instance_abbrv + ":agent-relationship-inv/" + str(a.id) + "/")
+            ref_subject = URIRef(instance_abbrv + ":agent/" + str(a.subject.id) + "/")
+            ref_object = URIRef(instance_abbrv + ":agent/" + str(a.object.id) + "/")
+            property_name = camelcase_lower(a.relationship.name)
+            inv_property_name = camelcase_lower(a.relationship.inverse_name)
+            ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + property_name)
+            inv_ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + inv_property_name)
+            #todo: change to store one and only one instance of relationship
+            store.add((ref, RDF.type, vf_ns["Relationship"]))
+            store.add((ref, vf_ns["subject"], ref_subject)) 
+            store.add((ref, vf_ns["object"], ref_object))
+            store.add((ref, vf_ns["relationship"], ref_relationship))
+            store.add((inv_ref, RDF.type, vf_ns["Relationship"]))
+            store.add((inv_ref, vf_ns["object"], ref_subject)) 
+            store.add((inv_ref, vf_ns["subject"], ref_object))
+            store.add((inv_ref, vf_ns["relationship"], inv_ref_relationship))
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
