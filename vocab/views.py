@@ -100,7 +100,8 @@ def get_lod_setup_items():
 def agents(request, format='json-ld'):
     agents = Agent.objects.all()
     if format == "json" or format == "yaml":
-        ser = serializers.serialize(format, agents)
+        ser = serializers.serialize(format, agents,
+        use_natural_foreign_keys=True, use_natural_primary_keys=True)
     else:
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
         for agent in agents:
@@ -118,7 +119,8 @@ def agents(request, format='json-ld'):
 def agentrelationships(request, format='json-ld'):
     associations = AgentRelationship.objects.all()
     if format == "json" or format == "yaml":
-        ser = serializers.serialize(format, associations)
+        ser = serializers.serialize(format, associations,
+            use_natural_foreign_keys=True, use_natural_primary_keys=True)
     else:
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
         for a in associations:
@@ -126,11 +128,12 @@ def agentrelationships(request, format='json-ld'):
             inv_ref = URIRef(instance_abbrv + ":agent-relationship-inv/" + str(a.id) + "/")
             ref_subject = URIRef(instance_abbrv + ":agent/" + str(a.subject.id) + "/")
             ref_object = URIRef(instance_abbrv + ":agent/" + str(a.object.id) + "/")
-            property_name = camelcase_lower(a.relationship.name)
-            inv_property_name = camelcase_lower(a.relationship.inverse_name)
+            property_name = camelcase_lower(a.relationship.label)
+            inv_property_name = camelcase_lower(a.relationship.inverse_label)
             ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + property_name)
             inv_ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + inv_property_name)
             #todo: change to store one and only one instance of relationship
+            #and change Relationship to AgentRelationship
             store.add((ref, RDF.type, vf_ns["Relationship"]))
             store.add((ref, vf_ns["subject"], ref_subject)) 
             store.add((ref, vf_ns["object"], ref_object))

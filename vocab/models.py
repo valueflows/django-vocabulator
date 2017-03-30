@@ -27,6 +27,11 @@ AGENT_SUBCLASS_OPTIONS = (
 )
 
 
+class AgentManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 @python_2_unicode_compatible
 class Agent(VocabBase):
     """
@@ -40,6 +45,7 @@ class Agent(VocabBase):
     agent_subclass =  models.CharField(_('subclass'),
         max_length=16, choices=AGENT_SUBCLASS_OPTIONS,
         default='Person')
+    objects = AgentManager()
         
     created_by = models.ForeignKey(User,
         blank=True, null=True, 
@@ -54,6 +60,10 @@ class Agent(VocabBase):
 
     def __str__(self):
         return self.name
+        
+    def natural_key(self):
+        return (self.name)
+
 
         
 @python_2_unicode_compatible        
@@ -62,8 +72,10 @@ class AgentRelationshipRole(VocabBase):
     vf:AgentRelationshipRole:
     not yet defined
     """
-    name = models.CharField(_('name'), max_length=255)
-    inverse_name = models.CharField(_('inverse name'), max_length=255)
+    label = models.CharField(_('label'), max_length=255,
+        blank=True, null=True,)
+    inverse_label = models.CharField(_('inverse label'), max_length=255,
+        blank=True, null=True,)
     
     created_by = models.ForeignKey(User,
         blank=True, null=True,
@@ -74,10 +86,10 @@ class AgentRelationshipRole(VocabBase):
 
     
     class Meta:
-        ordering = ('name',)
+        ordering = ('label',)
 
     def __str__(self):
-        return self.name
+        return self.label
         
     
 @python_2_unicode_compatible
@@ -110,7 +122,7 @@ class AgentRelationship(VocabBase):
     def __str__(self):
         return ' '.join([
             self.subject.name,
-            self.relationship.name,
+            self.relationship.label,
             self.object.name,
         ])
     
@@ -182,16 +194,16 @@ class Action(VocabBase):
     vf:Action:
     https://valueflows.gitbooks.io/valueflows/content/specification/generated-spec.html#d4e688
     """
-    name = models.CharField(_('name'), max_length=255)
+    label = models.CharField(_('label'), max_length=255, blank=True, null=True)
     note = models.TextField(_('note'), blank=True, null=True)
     resource_effect = models.CharField(_('resource effect'),
         max_length=16, choices=RESOURCE_EFFECT_OPTIONS)
     
     class Meta:
-        ordering = ('name',)
+        ordering = ('label',)
 
     def __str__(self):
-        return self.name       
+        return self.label       
 
 @python_2_unicode_compatible
 class QuantityKind(VocabBase):
