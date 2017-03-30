@@ -39,7 +39,7 @@ class Agent(VocabBase):
     https://valueflows.gitbooks.io/valueflows/content/introduction/agents.html
     https://valueflows.gitbooks.io/valueflows/content/specification/generated-spec.html#d4e666
     """
-    name = models.CharField(_('name'), max_length=255)
+    name = models.CharField(_('name'), max_length=255, unique=True)
     url = models.URLField(_('url'), blank=True)
     note = models.TextField(_('note'), blank=True, null=True)
     agent_subclass =  models.CharField(_('subclass'),
@@ -64,6 +64,10 @@ class Agent(VocabBase):
     def natural_key(self):
         return (self.name)
 
+        
+class AgentRelationshipRoleManager(models.Manager):
+    def get_by_natural_key(self, label):
+        return self.get(label=label)
 
         
 @python_2_unicode_compatible        
@@ -72,8 +76,7 @@ class AgentRelationshipRole(VocabBase):
     vf:AgentRelationshipRole:
     not yet defined
     """
-    label = models.CharField(_('label'), max_length=255,
-        blank=True, null=True,)
+    label = models.CharField(_('label'), max_length=255)
     inverse_label = models.CharField(_('inverse label'), max_length=255,
         blank=True, null=True,)
     
@@ -83,6 +86,8 @@ class AgentRelationshipRole(VocabBase):
     changed_by = models.ForeignKey(User,
         blank=True, null=True, 
         verbose_name=_('changed by'), related_name='roles_changed' )
+        
+    objects = AgentRelationshipRoleManager()
 
     
     class Meta:
@@ -90,6 +95,9 @@ class AgentRelationshipRole(VocabBase):
 
     def __str__(self):
         return self.label
+        
+    def natural_key(self):
+        return (self.label)
         
     
 @python_2_unicode_compatible
