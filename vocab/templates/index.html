@@ -1,5 +1,38 @@
 {% load i18n %}
+<style>
+div {
+    margin: 1em;
+}
 
-<p>
-    <a href="/admin/">{% trans "Admin" %}</a>
-</p>
+</style>
+
+<title>{% trans "ValueFlows Vocabulator" %}</title>
+
+<h2>{% trans "ValueFlows Vocabulator" %}</h2>
+
+<div>
+    <a href="/admin/vocab/">{% trans "Create or update your models" %}</a>
+    
+    <div>
+        <b>Agents:</b>
+        <a href="{% url 'agents_formatted' format='turtle' %}">turtle</a>
+        <a href="{% url 'agents_formatted' format='json-ld' %}">json-ld</a>
+        <a href="{% url 'agents_formatted' format='json' %}">json</a>
+        <a href="{% url 'agents_formatted' format='yaml' %}">yaml</a>
+        <a href="{% url 'agents_formatted' format='n3' %}">n3</a>
+        <a href="{% url 'agents_formatted' format='nt' %}">n-triples</a>
+        <a href="{% url 'agents_formatted' format='xml' %}">rdf+xml</a>
+    </div>
+    
+    <div>
+        <b>Agents Relationships:</b>
+        <a href="{% url 'agent_relationships_formatted' format='turtle' %}">turtle</a>
+        <a href="{% url 'agent_relationships_formatted' format='json-ld' %}">json-ld</a>
+        <a href="{% url 'agent_relationships_formatted' format='json' %}">json</a>
+        <a href="{% url 'agent_relationships_formatted' format='yaml' %}">yaml</a>
+        <a href="{% url 'agent_relationships_formatted' format='n3' %}">n3</a>
+        <a href="{% url 'agent_relationships_formatted' format='nt' %}">n-triples</a>
+        <a href="{% url 'agent_relationships_formatted' format='xml' %}">rdf+xml</a>
+    </div>
+
+</div>

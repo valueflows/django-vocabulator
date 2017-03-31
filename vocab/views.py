@@ -101,7 +101,8 @@ def agents(request, format='json-ld'):
     agents = Agent.objects.all()
     if format == "json" or format == "yaml":
         ser = serializers.serialize(format, agents,
-        use_natural_foreign_keys=True, use_natural_primary_keys=True)
+        use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        indent=4)
     else:
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
         for agent in agents:
@@ -118,9 +119,12 @@ def agents(request, format='json-ld'):
     
 def agentrelationships(request, format='json-ld'):
     associations = AgentRelationship.objects.all()
+    #import pdb; pdb.set_trace()
     if format == "json" or format == "yaml":
         ser = serializers.serialize(format, associations,
-            use_natural_foreign_keys=True, use_natural_primary_keys=True)
+            fields=('subject','relationship', 'object'),
+            use_natural_foreign_keys=True, use_natural_primary_keys=True,
+            indent=4)
     else:
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
         for a in associations:
@@ -129,19 +133,21 @@ def agentrelationships(request, format='json-ld'):
             ref_subject = URIRef(instance_abbrv + ":agent/" + str(a.subject.id) + "/")
             ref_object = URIRef(instance_abbrv + ":agent/" + str(a.object.id) + "/")
             property_name = camelcase_lower(a.relationship.label)
-            inv_property_name = camelcase_lower(a.relationship.inverse_label)
+            #inv_property_name = camelcase_lower(a.relationship.inverse_label)
             ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + property_name)
-            inv_ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + inv_property_name)
+            #inv_ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + inv_property_name)
             #todo: change to store one and only one instance of relationship
             #and change Relationship to AgentRelationship
-            store.add((ref, RDF.type, vf_ns["Relationship"]))
+            store.add((ref, RDF.type, vf_ns["AgentRelationship"]))
             store.add((ref, vf_ns["subject"], ref_subject)) 
             store.add((ref, vf_ns["object"], ref_object))
             store.add((ref, vf_ns["relationship"], ref_relationship))
-            store.add((inv_ref, RDF.type, vf_ns["Relationship"]))
-            store.add((inv_ref, vf_ns["object"], ref_subject)) 
-            store.add((inv_ref, vf_ns["subject"], ref_object))
-            store.add((inv_ref, vf_ns["relationship"], inv_ref_relationship))
+            
+            #store.add((inv_ref, RDF.type, vf_ns["AgentRelationship"]))
+            #store.add((inv_ref, vf_ns["object"], ref_subject)) 
+            #store.add((inv_ref, vf_ns["subject"], ref_object))
+            #store.add((inv_ref, vf_ns["relationship"], inv_ref_relationship))
+            
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
