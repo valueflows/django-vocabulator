@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '6u=lu5%benyo=4g181l!qo0gsu_wp*bt^dj=l2ys9!$ol7g!6b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['valueflows.pythonanywhere.com']
 
 SITE_ID = 1
 
