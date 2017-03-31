@@ -34,7 +34,7 @@ def index(request):
     return HttpResponse("Hello, world. You're at the vocab index.")
     
 def get_url_starter():
-    return "".join(["https://", Site.objects.get_current().domain])
+    return "".join(["http://", Site.objects.get_current().domain])
     
 def camelcase(name):
      return ''.join(x.capitalize() or ' ' for x in name.split(' '))
