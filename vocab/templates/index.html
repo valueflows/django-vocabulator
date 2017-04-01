@@ -4,6 +4,25 @@ div {
     margin: 1em;
 }
 
+#createLink {
+    text-align: left;
+    font-weight: bold;
+    padding-top: 1em;
+}
+
+#models {
+    margin-top: 0;
+    float: left;
+    width: 60%;
+}
+
+#doc {
+    float: left;
+    width: 35%;
+    padding-top: 1em;
+}
+
+
 </style>
 
 <title>{% trans "ValueFlows Vocabulator" %}</title>
@@ -11,28 +30,48 @@ div {
 <h2>{% trans "ValueFlows Vocabulator" %}</h2>
 
 <div>
-    <a href="/admin/vocab/">{% trans "Create or update your models" %}</a>
+    This is a demo for the <a href="https://www.valueflo.ws/">Value Flows</a> vocabulary.</br>
+    Create your examples, generate Linked Open Data in several formats using the vf:concepts.</br>
+    As of now, only Agents and AgentRelationships are generated below.</br>
+    But all currently released concepts can be modeled, including Processes, Actions, and EconomicEvents.
+</div>
+
+<div id="big" >
+    <p id="createLink">
+        <a href="/admin/vocab/">{% trans "Create or update your models" %}</a>
+    </p>
     
-    <div>
-        <b>Agents:</b>
-        <a href="{% url 'agents_formatted' format='turtle' %}">turtle</a>
-        <a href="{% url 'agents_formatted' format='json-ld' %}">json-ld</a>
-        <a href="{% url 'agents_formatted' format='json' %}">json</a>
-        <a href="{% url 'agents_formatted' format='yaml' %}">yaml</a>
-        <a href="{% url 'agents_formatted' format='n3' %}">n3</a>
-        <a href="{% url 'agents_formatted' format='nt' %}">n-triples</a>
-        <a href="{% url 'agents_formatted' format='xml' %}">rdf+xml</a>
-    </div>
-    
-    <div>
-        <b>Agent Relationships:</b>
-        <a href="{% url 'agent_relationships_formatted' format='turtle' %}">turtle</a>
-        <a href="{% url 'agent_relationships_formatted' format='json-ld' %}">json-ld</a>
-        <a href="{% url 'agent_relationships_formatted' format='json' %}">json</a>
-        <a href="{% url 'agent_relationships_formatted' format='yaml' %}">yaml</a>
-        <a href="{% url 'agent_relationships_formatted' format='n3' %}">n3</a>
-        <a href="{% url 'agent_relationships_formatted' format='nt' %}">n-triples</a>
-        <a href="{% url 'agent_relationships_formatted' format='xml' %}">rdf+xml</a>
+    <div id="models">
+            
+            
+            <div>
+                <b>Agents:</b>
+                <a href="{% url 'agents_formatted' format='turtle' %}">turtle</a>
+                <a href="{% url 'agents_formatted' format='json-ld' %}">json-ld</a>
+                <a href="{% url 'agents_formatted' format='json' %}">json</a>
+                <a href="{% url 'agents_formatted' format='yaml' %}">yaml</a>
+                <a href="{% url 'agents_formatted' format='n3' %}">n3</a>
+                <a href="{% url 'agents_formatted' format='nt' %}">n-triples</a>
+                <a href="{% url 'agents_formatted' format='xml' %}">rdf+xml</a>
+            </div>
+            
+            <div>
+                <b>Agent Relationships:</b>
+                <a href="{% url 'agent_relationships_formatted' format='turtle' %}">turtle</a>
+                <a href="{% url 'agent_relationships_formatted' format='json-ld' %}">json-ld</a>
+                <a href="{% url 'agent_relationships_formatted' format='json' %}">json</a>
+                <a href="{% url 'agent_relationships_formatted' format='yaml' %}">yaml</a>
+                <a href="{% url 'agent_relationships_formatted' format='n3' %}">n3</a>
+                <a href="{% url 'agent_relationships_formatted' format='nt' %}">n-triples</a>
+                <a href="{% url 'agent_relationships_formatted' format='xml' %}">rdf+xml</a>
+            </div>
+
     </div>
 
+    <div id="doc">
+        Depending on the browser you are using, as well as the default browser on your device, 
+        if it is different, some of these formats will open in your browser,
+        and some will download a file.
+
+    </div>
 </div>
