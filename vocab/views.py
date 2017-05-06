@@ -54,7 +54,7 @@ def get_lod_setup_items():
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         "skos": "http://www.w3.org/2004/02/skos/core#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-        #"rdfs:label": { "@container": "@language" },
+        "rdfs:label": { "@container": "@language" },
         "Agent": "vf:Agent",
         "Person": "foaf:Person",
         "Organization": "org:Organization",
@@ -107,10 +107,10 @@ def agents(request, format='json-ld'):
         for agent in agents:
             ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
             if agent.agent_subclass == "Person":
-                store.add((ref, RDF.type, vf_ns.Person))
+                store.add((ref, RDF.type, Person))
             elif agent.agent_subclass == "Organization":
-                store.add((ref, RDF.type, vf_ns.Organization))
-            store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))            
+                store.add((ref, RDF.type, Organization))
+            store.add((ref, label, Literal(agent.name, lang="en")))            
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]

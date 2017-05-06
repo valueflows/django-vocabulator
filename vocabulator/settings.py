@@ -124,3 +124,9 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 STATIC_URL = '/static/'
+
+# ----put all other settings above this line----
+try:
+    from local_settings import *
+except ImportError:
+    pass
