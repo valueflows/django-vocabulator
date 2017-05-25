@@ -46,8 +46,10 @@ def camelcase_lower(name):
 def get_lod_setup_items():
     
     path = get_url_starter() + "/vocab/"
-    instance_abbrv = Site.objects.get_current().domain.split(".")[0]
+    #instance_abbrv = Site.objects.get_current().domain.split(".")[0]
+    instance_abbrv = "vocabulator"
     
+    #import pdb; pdb.set_trace()
     context = {
         "vf": "https://w3id.org/valueflows/",
         "owl": "http://www.w3.org/2002/07/owl#",
@@ -117,6 +119,26 @@ def agents(request, format='json-ld'):
                 store.add((ref, RDF.type, org_ns.Organization)) 
             store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
         ser = store.serialize(format=format, context=context, indent=4)
+    #import pdb; pdb.set_trace()
+    content_type = CONTENT_TYPES[format]
+    return HttpResponse(ser, content_type=content_type)
+
+def agent(request, agent_id, format='json-ld'):
+    agent = EconomicAgent.objects.get(id=agent_id)
+    if format == "json" or format == "yaml":
+        ser = serializers.serialize(format, agent,
+        use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        indent=4)
+    else:
+        path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
+        ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
+        if agent.agent_subclass == "Person":
+            store.add((ref, RDF.type, FOAF.Person))
+        elif agent.agent_subclass == "Organization":
+            org_ns = Namespace("http://www.w3.org/ns/org#")
+            store.add((ref, RDF.type, org_ns.Organization)) 
+        store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
+    ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
     return HttpResponse(ser, content_type=content_type)
