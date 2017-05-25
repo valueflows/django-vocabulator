@@ -55,6 +55,8 @@ def get_lod_setup_items():
         "skos": "http://www.w3.org/2004/02/skos/core#",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
         "rdfs:label": { "@container": "@language" },
+        "foaf": "http://xmlns.com/foaf/0.1/",
+        "org": "http://www.w3.org/ns/org#",
         "Agent": "vf:Agent",
         "Person": "foaf:Person",
         "Organization": "org:Organization",
@@ -76,11 +78,13 @@ def get_lod_setup_items():
     }
     
     store = Graph()
-    #store.bind("foaf", FOAF)
+    store.bind("foaf", FOAF)
     store.bind("rdf", RDF)
     store.bind("rdfs", RDFS)
     store.bind("owl", OWL)
     store.bind("skos", SKOS)
+    #org_ns = Namespace("http://www.w3.org/ns/org#")
+    #store.bind("org", org_ns)
     #as_ns = Namespace("http://www.w3.org/ns/activitystreams#")
     #store.bind("as", as_ns)
     #schema_ns = Namespace("http://schema.org/")
@@ -107,10 +111,11 @@ def agents(request, format='json-ld'):
         for agent in agents:
             ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
             if agent.agent_subclass == "Person":
-                store.add((ref, RDF.type, Person))
+                store.add((ref, RDF.type, FOAF.Person))
             elif agent.agent_subclass == "Organization":
-                store.add((ref, RDF.type, Organization))
-            store.add((ref, label, Literal(agent.name, lang="en")))            
+                org_ns = Namespace("http://www.w3.org/ns/org#")
+                store.add((ref, RDF.type, org_ns.Organization)) 
+            store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
