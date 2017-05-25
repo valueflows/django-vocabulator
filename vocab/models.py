@@ -304,16 +304,18 @@ class EconomicEvent(VocabBase):
         ordering = ('-date_and_time',)
 
     def __str__(self):
-        
+        resource_string = ""
+        if self.resource:
+            resource_string = self.resource.__str__()
         return ' '.join([
-            self.action.name,
+            self.action.label,
             self.date_and_time.strftime('%Y-%m-%d'),
             'provider',
             self.provider.name,
             'receiver',
             self.receiver.name,
             self.quantity_value.__str__(),
-            self.resource.__str__(),
+            resource_string,
         ])
 
         
