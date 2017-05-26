@@ -125,8 +125,10 @@ def agents(request, format='json-ld'):
 
 def agent(request, agent_id, format='json-ld'):
     agent = Agent.objects.get(id=agent_id)
+    agents = []
+    agents.append(agent)
     if format == "json" or format == "yaml":
-        ser = serializers.serialize(format, agent,
+        ser = serializers.serialize(format, agents,
         use_natural_foreign_keys=True, use_natural_primary_keys=True,
         indent=4)
     else:
@@ -174,6 +176,28 @@ def agentrelationships(request, format='json-ld'):
             #store.add((inv_ref, vf_ns["subject"], ref_object))
             #store.add((inv_ref, vf_ns["relationship"], inv_ref_relationship))
             
+        ser = store.serialize(format=format, context=context, indent=4)
+    #import pdb; pdb.set_trace()
+    content_type = CONTENT_TYPES[format]
+    return HttpResponse(ser, content_type=content_type)
+
+def processes(request, format='json-ld'):
+    processes = Process.objects.all()
+    if format == "json" or format == "yaml":
+        ser = serializers.serialize(format, processes,
+        use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        indent=4)
+    else:
+        path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
+        for process in processes:
+            ref = URIRef(instance_abbrv + ":process/" + str(process.id) + "/")
+            
+            if agent.agent_subclass == "Person":
+                store.add((ref, RDF.type, FOAF.Person))
+            elif agent.agent_subclass == "Organization":
+                org_ns = Namespace("http://www.w3.org/ns/org#")
+                store.add((ref, RDF.type, org_ns.Organization)) 
+            store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
