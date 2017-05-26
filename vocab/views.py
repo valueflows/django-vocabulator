@@ -71,6 +71,10 @@ def get_lod_setup_items():
         "object": { "@id": "vf:object", "@type": "@id" },
         "relationship": { "@id": "vf:relationship", "@type": "@id" },
         #"member": { "@id": "vf:member", "@type": "@id" }
+        "Process": "vf:Process",
+        "plannedStart": "xsd:String", #?
+        "plannedDuration": "qudt:quantityValue", #?
+        "isFinished": "xsd:boolean",
         "label": "skos:prefLabel",
         "labelMap": { "@id": "skos:prefLabel", "@container": "@language" },
         "note": "skos:note",
@@ -118,6 +122,7 @@ def agents(request, format='json-ld'):
                 org_ns = Namespace("http://www.w3.org/ns/org#")
                 store.add((ref, RDF.type, org_ns.Organization)) 
             store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
+            #todo: image, url, primaryLocation, note; and also make sure we are using label instead of name
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
@@ -191,13 +196,12 @@ def processes(request, format='json-ld'):
         path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
         for process in processes:
             ref = URIRef(instance_abbrv + ":process/" + str(process.id) + "/")
-            
-            if agent.agent_subclass == "Person":
-                store.add((ref, RDF.type, FOAF.Person))
-            elif agent.agent_subclass == "Organization":
-                org_ns = Namespace("http://www.w3.org/ns/org#")
-                store.add((ref, RDF.type, org_ns.Organization)) 
-            store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
+            store.add((ref, RDF.type, vf_ns["Process"]))            
+            #name, plannedStart, plannedDuration, isFinished, note
+            store.add((ref, vf_ns["label"], Literal(process.name, lang="en")))
+            store.add((ref, vf_ns["plannedStart"], Literal(process.planned_start))) #todo:fix
+            store.add((ref, vf_ns["plannedDuration"], Literal(process.planned_duration))) #todo:fix
+            store.add((ref, vf_ns["isFinished"], Literal(process.is_finished))) #todo:fix
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
