@@ -124,7 +124,7 @@ def agents(request, format='json-ld'):
     return HttpResponse(ser, content_type=content_type)
 
 def agent(request, agent_id, format='json-ld'):
-    agent = EconomicAgent.objects.get(id=agent_id)
+    agent = Agent.objects.get(id=agent_id)
     if format == "json" or format == "yaml":
         ser = serializers.serialize(format, agent,
         use_natural_foreign_keys=True, use_natural_primary_keys=True,
@@ -138,7 +138,7 @@ def agent(request, agent_id, format='json-ld'):
             org_ns = Namespace("http://www.w3.org/ns/org#")
             store.add((ref, RDF.type, org_ns.Organization)) 
         store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
-    ser = store.serialize(format=format, context=context, indent=4)
+        ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
     return HttpResponse(ser, content_type=content_type)
