@@ -163,6 +163,33 @@ class Process(VocabBase):
     def __str__(self):
         return self.name
         
+    def output_events(self):
+        return self.events.filter(action__resource_effect="increment")
+        
+    def input_events(self):
+        return self.events.exclude(action__resource_effect="increment")
+        
+    def previous_processes(self):
+        #import pdb; pdb.set_trace()
+        inputs = self.input_events()
+        processes = []
+        for inp in inputs:
+            resource = inp.resource
+            if resource:
+                events = resource.where_from()
+                processes.extend([e.process for e in events])
+        return processes
+
+    def next_processes(self):
+        outputs = self.output_events()
+        processes = []
+        for output in outputs:
+            resource = output.resource
+            if resource:
+                events = resource.where_to()
+                processes.extend([e.process for e in events])
+        return processes
+        
         
 @python_2_unicode_compatible
 class EconomicResource(VocabBase):
@@ -188,6 +215,12 @@ class EconomicResource(VocabBase):
 
     def __str__(self):
         return self.name
+        
+    def where_from(self):
+        return self.events.filter(action__resource_effect="increment")
+        
+    def where_to(self):
+        return self.events.exclude(action__resource_effect="increment")
 
         
 RESOURCE_EFFECT_OPTIONS = (
@@ -317,6 +350,7 @@ class EconomicEvent(VocabBase):
             self.quantity_value.__str__(),
             resource_string,
         ])
+        
 
         
         
