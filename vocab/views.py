@@ -129,6 +129,7 @@ def agents(request, format='json-ld'):
     return HttpResponse(ser, content_type=content_type)
 
 def agent(request, agent_id, format='json-ld'):
+    #import pdb; pdb.set_trace()
     agent = Agent.objects.get(id=agent_id)
     agents = []
     agents.append(agent)
@@ -181,6 +182,65 @@ def agentrelationships(request, format='json-ld'):
             #store.add((inv_ref, vf_ns["subject"], ref_object))
             #store.add((inv_ref, vf_ns["relationship"], inv_ref_relationship))
             
+        ser = store.serialize(format=format, context=context, indent=4)
+    #import pdb; pdb.set_trace()
+    content_type = CONTENT_TYPES[format]
+    return HttpResponse(ser, content_type=content_type)
+
+
+def agent_relationships_as_subject(request, agent_id, format='json-ld'):
+    #import pdb; pdb.set_trace()
+    agent = Agent.objects.get(id=agent_id)
+    associations = agent.subject_relationships.all()
+    if format == "json" or format == "yaml":
+        ser = serializers.serialize(format, associations,
+            fields=('subject','relationship', 'object'),
+            use_natural_foreign_keys=True, use_natural_primary_keys=True,
+            indent=4)
+    else:
+        path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
+        for a in associations:
+            ref = URIRef(instance_abbrv + ":agent-relationship/" + str(a.id) + "/")
+            inv_ref = URIRef(instance_abbrv + ":agent-relationship-inv/" + str(a.id) + "/")
+            ref_subject = URIRef(instance_abbrv + ":agent/" + str(a.subject.id) + "/")
+            ref_object = URIRef(instance_abbrv + ":agent/" + str(a.object.id) + "/")
+            property_name = camelcase_lower(a.relationship.label)
+            #inv_property_name = camelcase_lower(a.relationship.inverse_label)
+            ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + property_name)
+            #inv_ref_relationship = URIRef(instance_abbrv + ":agent-relationship-role/" + inv_property_name)
+            #todo: change to store one and only one instance of relationship
+            #and change Relationship to AgentRelationship
+            store.add((ref, RDF.type, vf_ns["AgentRelationship"]))
+            store.add((ref, vf_ns["subject"], ref_subject)) 
+            store.add((ref, vf_ns["object"], ref_object))
+            store.add((ref, vf_ns["relationship"], ref_relationship))
+        ser = store.serialize(format=format, context=context, indent=4)
+    content_type = CONTENT_TYPES[format]
+    return HttpResponse(ser, content_type=content_type)
+
+
+def agents_subject_of(request, agent_id, format='json-ld'):
+    #import pdb; pdb.set_trace()
+    agent = Agent.objects.get(id=agent_id)
+    associations = agent.subject_relationships.all()
+    agents = []
+    for assoc in associations:
+        agents.append(assoc.object)
+    if format == "json" or format == "yaml":
+        ser = serializers.serialize(format, agents,
+        use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        indent=4)
+    else:
+        path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
+        for agent in agents:
+            ref = URIRef(instance_abbrv + ":agent/" + str(agent.id) + "/")
+            if agent.agent_subclass == "Person":
+                store.add((ref, RDF.type, FOAF.Person))
+            elif agent.agent_subclass == "Organization":
+                org_ns = Namespace("http://www.w3.org/ns/org#")
+                store.add((ref, RDF.type, org_ns.Organization)) 
+            store.add((ref, vf_ns["label"], Literal(agent.name, lang="en")))
+            #todo: image, url, primaryLocation, note; and also make sure we are using label instead of name
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
