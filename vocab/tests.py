@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import datetime
 from decimal import *
 
+from django.utils import timezone
 from django.test import TestCase
 from models import *
 
@@ -23,7 +23,7 @@ class ProcessNeighborsTest(TestCase):
             two = QuantityValue.objects.create(
                 numeric_value=Decimal("2.0"),
                 unit=each)
-            now = datetime.datetime.now()
+            now = timezone.now()
             alice = Agent.objects.create(name="alice")
             bob = Agent.objects.create(name="bob")
             carol = Agent.objects.create(name="carol")
