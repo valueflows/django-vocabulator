@@ -216,6 +216,40 @@ class EconomicResource(VocabBase):
         
     def where_to(self):
         return self.events.exclude(action__resource_effect="increment")
+        
+    def incoming_flows(self):
+        flows = []
+        visited = set()
+        visited.add(self)
+        depth = 0
+        self.depth = depth
+        flows.append(self)
+        self.incoming_flows_dfs(flows, visited, depth)
+        return flows
+        
+    def incoming_flows_dfs(self, flows, visited, depth):
+        #import pdb; pdb.set_trace()
+        for event in self.where_from():
+            if event not in visited: 
+                event.depth = self.depth + 1
+                visited.add(event)
+                flows.append(event)
+                process = event.process
+                if process and process not in visited:
+                    process.depth = event.depth + 1
+                    visited.add(process)
+                    flows.append(process)
+                    for inp in process.input_events():
+                        if inp not in visited:
+                            inp.depth = process.depth + 1
+                            visited.add(inp)
+                            flows.append(inp)
+                            resource = inp.resource
+                            if resource and resource not in visited:
+                                resource.depth = inp.depth + 1
+                                visited.add(resource)
+                                flows.append(resource)
+                                resource.incoming_flows_dfs(flows, visited, depth)
 
         
 RESOURCE_EFFECT_OPTIONS = (
