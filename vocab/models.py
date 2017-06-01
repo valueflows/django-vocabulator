@@ -165,7 +165,6 @@ class Process(VocabBase):
         return self.events.exclude(action__resource_effect="increment")
         
     def previous_processes(self):
-        #import pdb; pdb.set_trace()
         inputs = self.input_events()
         processes = []
         for inp in inputs:
@@ -223,33 +222,52 @@ class EconomicResource(VocabBase):
         visited.add(self)
         depth = 0
         self.depth = depth
+        self.next = None
         flows.append(self)
         self.incoming_flows_dfs(flows, visited, depth)
         return flows
         
     def incoming_flows_dfs(self, flows, visited, depth):
-        #import pdb; pdb.set_trace()
         for event in self.where_from():
             if event not in visited: 
                 event.depth = self.depth + 1
+                event.next = self
+                self.pred = event
                 visited.add(event)
                 flows.append(event)
                 process = event.process
                 if process and process not in visited:
                     process.depth = event.depth + 1
+                    process.next = event
+                    event.pred = process
                     visited.add(process)
                     flows.append(process)
                     for inp in process.input_events():
                         if inp not in visited:
                             inp.depth = process.depth + 1
+                            inp.next = process
+                            process.pred = inp
                             visited.add(inp)
                             flows.append(inp)
                             resource = inp.resource
                             if resource and resource not in visited:
                                 resource.depth = inp.depth + 1
+                                resource.next = inp
+                                inp.pred = resource
                                 visited.add(resource)
                                 flows.append(resource)
                                 resource.incoming_flows_dfs(flows, visited, depth)
+                                
+    def topological_sorted_inflows(self):
+        from toposort import toposort_flatten
+        flows = self.incoming_flows()
+        data = {}
+        for f in flows:
+            try:
+                data[f] = set([f.pred,])
+            except AttributeError:
+                data[f] = set()
+        return toposort_flatten(data)
 
         
 RESOURCE_EFFECT_OPTIONS = (

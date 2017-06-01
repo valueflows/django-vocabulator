@@ -5,6 +5,7 @@ from decimal import *
 from django.utils import timezone
 from django.test import TestCase
 from models import *
+from utils import *
 
 # Create your tests here.
 
@@ -71,4 +72,32 @@ class ProcessNeighborsTest(TestCase):
             self.assertEqual(len(component_nexts), 1)
             self.assertIn(product_process, component_nexts)
             self.assertEqual(len(product_nexts), 0)
+            
+        def test_incoming_flows(self):
+            ends = end_resources()
+            end = ends[0]
+            flows = end.incoming_flows()
+            self.assertEqual(len(flows), 7)
+            roots = [f for f in flows if not f.next]
+            self.assertEqual(len(roots), 1)
+            root = roots[0]
+            self.assertEqual(root, end)
+            
+            this = flows[len(flows)-1]
+            next = this.next
+            
+            while next:
+                next = this.next
+                if next:
+                    this = next
+            self.assertEqual(root, this)
+            
+        def test_topological_sort(self):
+            ends = end_resources()
+            end = ends[0]
+            topo = end.topological_sorted_inflows()
+            component_process = Process.objects.get(name="Create Component")
+            self.assertEqual(topo[0], component_process)
+   
+
             
