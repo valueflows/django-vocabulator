@@ -1,0 +1,28 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+<title>{% trans "Incoming Flows" %}</title>
+<body>
+<h2>{% trans "Incoming Flows" %}</h2>
+<p> Click the open triangle to show the next level...<p>
+<div id="jstree_div"></div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $.jstree.defaults.core.themes.variant = "large";
+        $('#jstree_div').jstree({ 'core' : {
+            "themes" : { "stripes" : true },
+            'data' : [
+                {% for f in flows %}
+                    { "id" : "{{ f.sid }}", "parent" : "{{ f.parent }}", "text" : "{{ f }}" },
+                {% endfor %}
+            ]
+        } });
+     });
+</script>
+</html>

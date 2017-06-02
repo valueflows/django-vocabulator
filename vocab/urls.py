@@ -16,4 +16,5 @@ urlpatterns = [
     url(r"^agentssubjectof/(?P<agent_id>\d+)/(?P<format>[a-zA-Z0-9\-]+)/$", views.agents_subject_of, name="agents_subject_of_formatted"),
     url(r"^processess/$", views.processes, name="processes"),
     url(r"^processes/(?P<format>[a-zA-Z0-9\-]+)/$", views.processes, name="processes_formatted"),
+    url(r"^incoming/$", views.incoming, name="incoming"),
 ]

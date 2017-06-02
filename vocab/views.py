@@ -15,6 +15,7 @@ from urllib2 import urlopen
 from io import StringIO
 
 from models import *
+from utils import *
 
 
 CONTENT_TYPES = {
@@ -267,4 +268,16 @@ def processes(request, format='json-ld'):
     content_type = CONTENT_TYPES[format]
     return HttpResponse(ser, content_type=content_type)
 
-    
+def incoming(request):
+    ends = end_resources()
+    end = ends[0]
+    flows = end.incoming_flows()
+    for f in flows:
+        f.sid = type(f).__name__ + str(f.id)
+        try:
+            f.parent = type(f.next).__name__ + str(f.next.id)
+        except AttributeError:
+            f.parent = "#"
+    return render(request, "vocab/incoming_flows.html", {
+        "flows": flows,
+    })

@@ -3,3 +3,4 @@ html5lib
 rdflib
 rdflib-jsonld
 pyyaml
+toposort
