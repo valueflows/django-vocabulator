@@ -157,6 +157,9 @@ class Process(VocabBase):
 
     def __str__(self):
         return self.name
+    
+    def label(self):
+        return self.name
         
     def output_events(self):
         return self.events.filter(action__resource_effect="increment")
@@ -210,6 +213,9 @@ class EconomicResource(VocabBase):
     def __str__(self):
         return self.name
         
+    def label(self):
+        return self.name
+        
     def where_from(self):
         return self.events.filter(action__resource_effect="increment")
         
@@ -222,38 +228,52 @@ class EconomicResource(VocabBase):
         visited.add(self)
         depth = 0
         self.depth = depth
-        self.next = None
+        self.next = []
+        self.preds = []
         flows.append(self)
         self.incoming_flows_dfs(flows, visited, depth)
         return flows
         
     def incoming_flows_dfs(self, flows, visited, depth):
+        #if self.name == "Piezo buzzer pump bottom":
+        #    import pdb; pdb.set_trace() 
         for event in self.where_from():
             if event not in visited: 
+                event.next = []
+                event.preds = []
                 event.depth = self.depth + 1
-                event.next = self
-                self.pred = event
+                event.next.append(self)
+                self.preds.append(event)
                 visited.add(event)
                 flows.append(event)
                 process = event.process
-                if process and process not in visited:
+                #if process and process not in visited:
+                # problem: does not allow multiple outputs
+                if process:
+                    process.next = []
+                    process.preds = []
                     process.depth = event.depth + 1
-                    process.next = event
-                    event.pred = process
+                    
+                    process.next.append(event)
+                    event.preds.append(process)
                     visited.add(process)
                     flows.append(process)
                     for inp in process.input_events():
                         if inp not in visited:
+                            inp.next = []
+                            inp.preds = []
                             inp.depth = process.depth + 1
-                            inp.next = process
-                            process.pred = inp
+                            inp.next.append(process)
+                            process.preds.append(inp)
                             visited.add(inp)
                             flows.append(inp)
                             resource = inp.resource
                             if resource and resource not in visited:
+                                resource.next = []
+                                resource.preds = []
                                 resource.depth = inp.depth + 1
-                                resource.next = inp
-                                inp.pred = resource
+                                resource.next.append(inp)
+                                inp.preds.append(resource)
                                 visited.add(resource)
                                 flows.append(resource)
                                 resource.incoming_flows_dfs(flows, visited, depth)
@@ -262,10 +282,11 @@ class EconomicResource(VocabBase):
         from toposort import toposort_flatten
         flows = self.incoming_flows()
         data = {}
+        #import pdb; pdb.set_trace()
         for f in flows:
-            try:
-                data[f] = set([f.pred,])
-            except AttributeError:
+            if f.preds:
+                data[f] = set(f.preds)
+            else:
                 data[f] = set()
         return toposort_flatten(data)
 
@@ -397,7 +418,16 @@ class EconomicEvent(VocabBase):
             self.quantity_value.__str__(),
             resource_string,
         ])
-        
+    
+    def label(self):
+        if self.resource:
+            return ' '.join([
+                self.action.label,
+                self.resource.__str__(),
+            ])
+        else:
+            return None
+       
 
         
         

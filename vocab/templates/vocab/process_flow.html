@@ -1,0 +1,69 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<style>
+#cy {
+  width: 800px;
+  height: 800px;
+  display: block;
+}
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+<title>{% trans "Process Flow" %}</title>
+<body>
+<h2>{% trans "Process Flow" %}</h2>
+
+<div id="cy"></div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.1/cytoscape.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        var cy = cytoscape({
+        container: $('#cy'),
+
+        style: cytoscape.stylesheet()
+            .selector('node')
+                .css({
+                    'height': 20,
+                    'width': 20,
+                    'background-fit': 'cover',
+                    'border-color': '#000',
+                    'border-width': 3,
+                    'border-opacity': 0.5,
+                    'font-size': 30,
+                    'label': 'data(label)'
+                })
+            .selector('edge')
+                .css({
+                    'width': 6,
+                    'target-arrow-shape': 'triangle',
+                    'line-color': '#ffaaaa',
+                    'target-arrow-color': '#ffaaaa'
+                }),
+
+        elements: {
+            nodes: [
+                {% for node in nodes %}
+                    { data: {id: "{{ node.sid }}", label: "{{ node.label }}" } },
+                {% endfor %}
+            ],
+            edges: [
+                {% for source, target in edges %}
+                    { data: { source: "{{ source }}", target: "{{ target }}" } },
+                {% endfor %}
+            ]
+        },
+
+        layout: {
+            name: 'breadthfirst',
+            directed: true,
+            padding: 10
+        }
+        }); 
+     });
+</script>
+</html>

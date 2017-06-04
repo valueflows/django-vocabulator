@@ -274,10 +274,31 @@ def incoming(request):
     flows = end.incoming_flows()
     for f in flows:
         f.sid = type(f).__name__ + str(f.id)
-        try:
-            f.parent = type(f.next).__name__ + str(f.next.id)
-        except AttributeError:
+        if f.next:
+            for n in f.next:
+                f.parent = type(n).__name__ + str(n.id)
+        else:
             f.parent = "#"
     return render(request, "vocab/incoming_flows.html", {
         "flows": flows,
     })
+    
+def process_flow(request):
+    ends = end_resources()
+    end = ends[0]
+    nodes = [f for f in end.incoming_flows() if f.label()]
+    edges = []
+    #import pdb; pdb.set_trace()
+    for f in nodes:
+        f.sid = type(f).__name__ + str(f.id)
+        for p in f.preds:
+            if p.label:
+                pred = type(p).__name__ + str(p.id)
+                edges.append([pred, f.sid])
+
+    #import pdb; pdb.set_trace()    
+    return render(request, "vocab/process_flow.html", {
+        "nodes": nodes,
+        "edges": edges,
+    })
+

@@ -84,12 +84,15 @@ class ProcessNeighborsTest(TestCase):
             self.assertEqual(root, end)
             
             this = flows[len(flows)-1]
-            next = this.next
-            
+            next = this.next[0]
+            #import pdb; pdb.set_trace()
             while next:
-                next = this.next
-                if next:
-                    this = next
+                if this.next:
+                    next = this.next[0]
+                    if next:
+                        this = next
+                else:
+                    next = False
             self.assertEqual(root, this)
             
         def test_topological_sort(self):
@@ -97,6 +100,7 @@ class ProcessNeighborsTest(TestCase):
             end = ends[0]
             topo = end.topological_sorted_inflows()
             component_process = Process.objects.get(name="Create Component")
+            #import pdb; pdb.set_trace()
             self.assertEqual(topo[0], component_process)
    
 
