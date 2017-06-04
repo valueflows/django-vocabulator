@@ -307,3 +307,22 @@ def process_flow(request):
         "roots": roots,
     })
 
+def processes_only(request):
+    flows = process_flows()
+    roots = flows.keys()
+    flows = flows.values()
+    nodes = []
+    edges = []
+    #import pdb; pdb.set_trace()
+    for flow in flows:
+        for f in flow:
+            f.sid = f.class_name() + str(f.id)
+            nodes.append(f)
+            for p in f.next_processes():
+                next = p.class_name() + str(p.id)
+                edges.append([f.sid, next])
+    return render(request, "vocab/process_flow.html", {
+        "nodes": nodes,
+        "edges": edges,
+        "roots": roots,
+    })

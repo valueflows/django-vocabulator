@@ -178,6 +178,7 @@ class Process(VocabBase):
             if resource:
                 events = resource.where_from()
                 processes.extend([e.process for e in events])
+        processes = list(set(processes))
         return processes
 
     def next_processes(self):
@@ -188,8 +189,29 @@ class Process(VocabBase):
             if resource:
                 events = resource.where_to()
                 processes.extend([e.process for e in events])
+        processes = list(set(processes))
         return processes
         
+    def process_flow(self):
+        #starting with self
+        flows = [self,]
+        self.process_flow_dfs(flows)
+        return flows
+        
+    def process_flow_dfs(self, flows):
+        next = self.next_processes()
+        for n in next:
+            flows.append(n)
+            n.process_flow_dfs(flows)
+
+
+def process_flows():
+    processes = Process.objects.all()
+    roots = [p for p in processes if not p.previous_processes()]
+    flows = {}
+    for r in roots:
+        flows[r] = r.process_flow()
+    return flows
         
 @python_2_unicode_compatible
 class EconomicResource(VocabBase):

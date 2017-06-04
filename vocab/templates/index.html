@@ -81,8 +81,14 @@ div {
             
             <div>
                 <b>Flows:</b> 
-                <a href="{% url 'incoming' %}">Incoming Flows Tree</a> 
-                <a href="{% url 'process_flow' %}">Process flow Diagram</a>
+                <ul>
+                    <li><a href="{% url 'incoming' %}">Incoming Flows Tree</a></li>
+                    <li>Process Flow Diagrams:<li>
+                    <ul>
+                        <li><a href="{% url 'process_flow' %}">Including Events and Resources</a></li>
+                        <li><a href="{% url 'processes_only' %}">Processes only</a></li>
+                    </ul>
+                </ul>
             </div>
 
     </div>
