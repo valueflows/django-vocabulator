@@ -244,45 +244,46 @@ class EconomicResource(VocabBase):
         #if self.name == "Piezo buzzer pump bottom":
         #    import pdb; pdb.set_trace() 
         for event in self.where_from():
-            if event not in visited: 
-                event.next = []
-                event.preds = []
-                event.depth = self.depth + 1
-                event.next.append(self)
-                self.preds.append(event)
-                visited.add(event)
-                flows.append(event)
-                process = event.process
-                #if process and process not in visited:
-                # problem: does not allow multiple outputs
-                if process:
-                    process.next = []
-                    process.preds = []
-                    process.depth = event.depth + 1
-                    
-                    process.next.append(event)
-                    event.preds.append(process)
-                    visited.add(process)
-                    flows.append(process)
-                    for inp in process.input_events():
-                        if inp not in visited:
-                            inp.next = []
-                            inp.preds = []
-                            inp.depth = process.depth + 1
-                            inp.next.append(process)
-                            process.preds.append(inp)
-                            visited.add(inp)
-                            flows.append(inp)
-                            resource = inp.resource
-                            if resource and resource not in visited:
-                                resource.next = []
-                                resource.preds = []
-                                resource.depth = inp.depth + 1
-                                resource.next.append(inp)
-                                inp.preds.append(resource)
-                                visited.add(resource)
-                                flows.append(resource)
-                                resource.incoming_flows_dfs(flows, visited, depth)
+            #if event not in visited: 
+            event.next = []
+            event.preds = []
+            event.depth = self.depth + 1
+            event.next.append(self)
+            self.preds.append(event)
+            visited.add(event)
+            flows.append(event)
+            process = event.process
+            #if process and process not in visited:
+            # problem: does not allow multiple outputs
+            if process:
+                process.next = []
+                process.preds = []
+                process.depth = event.depth + 1
+                
+                process.next.append(event)
+                event.preds.append(process)
+                visited.add(process)
+                flows.append(process)
+                for inp in process.input_events():
+                    #if inp not in visited:
+                    inp.next = []
+                    inp.preds = []
+                    inp.depth = process.depth + 1
+                    inp.next.append(process)
+                    process.preds.append(inp)
+                    visited.add(inp)
+                    flows.append(inp)
+                    resource = inp.resource
+                    #if resource and resource not in visited:
+                    if resource:
+                        resource.next = []
+                        resource.preds = []
+                        resource.depth = inp.depth + 1
+                        resource.next.append(inp)
+                        inp.preds.append(resource)
+                        visited.add(resource)
+                        flows.append(resource)
+                        resource.incoming_flows_dfs(flows, visited, depth)
                                 
     def topological_sorted_inflows(self):
         from toposort import toposort_flatten
@@ -432,7 +433,11 @@ class EconomicEvent(VocabBase):
                 self.resource.__str__(),
             ])
         else:
-            return None
+            return ' '.join([
+                self.provider.name,
+                self.action.label,
+            ])
+            #return None
             
     def class_name(self):
         return "EconomicEvent"

@@ -83,6 +83,7 @@
         layout: {
             name: 'breadthfirst',
             directed: true,
+            roots: {% for r in roots %} "#{{ r.sid }}", {% endfor %}
             padding: 10
         }
         }); 
