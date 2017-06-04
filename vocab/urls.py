@@ -18,5 +18,6 @@ urlpatterns = [
     url(r"^processes/(?P<format>[a-zA-Z0-9\-]+)/$", views.processes, name="processes_formatted"),
     url(r"^incoming/$", views.incoming, name="incoming"),
     url(r"^process-flow/$", views.process_flow, name="process_flow"),
+    url(r"^process-resource-flow/$", views.process_resource_flow, name="process_resource_flow"),
     url(r"^processes-only/$", views.processes_only, name="processes_only"),
 ]

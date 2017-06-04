@@ -284,6 +284,7 @@ def incoming(request):
     })
     
 def process_flow(request):
+    # includes processes, resources and events
     ends = end_resources()
     end = ends[0]
     nodes = [f for f in end.incoming_flows() if f.label()]
@@ -301,6 +302,26 @@ def process_flow(request):
     roots = [r for r in roots if not r.class_name() == "EconomicEvent"]
     
     #import pdb; pdb.set_trace()    
+    return render(request, "vocab/process_flow.html", {
+        "nodes": nodes,
+        "edges": edges,
+        "roots": roots,
+    })
+    
+def process_resource_flow(request):
+    flows = process_resource_flows()
+    roots = flows.keys()
+    flows = flows.values()
+    nodes = []
+    edges = []
+    #import pdb; pdb.set_trace()
+    for flow in flows:
+        for f in flow:
+            f.sid = f.class_name() + str(f.id)
+            nodes.append(f)
+            for n in f.next:
+                n.sid = n.class_name() + str(n.id) 
+                edges.append([f.sid, n.sid])
     return render(request, "vocab/process_flow.html", {
         "nodes": nodes,
         "edges": edges,

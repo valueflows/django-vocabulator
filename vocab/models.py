@@ -203,7 +203,28 @@ class Process(VocabBase):
         for n in next:
             flows.append(n)
             n.process_flow_dfs(flows)
-
+            
+    def process_resource_flow(self):
+        #starting with self
+        self.next = []
+        flows = [self,]
+        self.process_resource_flow_dfs(flows)
+        return flows
+        
+    def process_resource_flow_dfs(self, flows):
+        resources = [evt.resource for evt in self.output_events() if evt.resource]
+        #import pdb; pdb.set_trace()
+        for resource in resources:
+            resource.next = []
+            self.next.append(resource)
+            flows.append(resource)
+            processes = [evt.process for evt in resource.where_to() if evt.process]
+            for process in processes:
+                resource.next.append(process)
+                flows.append(process)
+                process.next = []
+                process.process_resource_flow_dfs(flows)
+            
 
 def process_flows():
     processes = Process.objects.all()
@@ -211,6 +232,15 @@ def process_flows():
     flows = {}
     for r in roots:
         flows[r] = r.process_flow()
+    return flows
+    
+def process_resource_flows():
+    #import pdb; pdb.set_trace()
+    processes = Process.objects.all()
+    roots = [p for p in processes if not p.previous_processes()]
+    flows = {}
+    for r in roots:
+        flows[r] = r.process_resource_flow()
     return flows
         
 @python_2_unicode_compatible
