@@ -273,10 +273,10 @@ def incoming(request):
     end = ends[0]
     flows = end.incoming_flows()
     for f in flows:
-        f.sid = type(f).__name__ + str(f.id)
+        f.sid = f.class_name() + str(f.id)
         if f.next:
             for n in f.next:
-                f.parent = type(n).__name__ + str(n.id)
+                f.parent = n.class_name() + str(n.id)
         else:
             f.parent = "#"
     return render(request, "vocab/incoming_flows.html", {
@@ -290,10 +290,10 @@ def process_flow(request):
     edges = []
     #import pdb; pdb.set_trace()
     for f in nodes:
-        f.sid = type(f).__name__ + str(f.id)
+        f.sid = f.class_name() + str(f.id)
         for p in f.preds:
-            if p.label:
-                pred = type(p).__name__ + str(p.id)
+            if p.label():
+                pred = p.class_name() + str(p.id)
                 edges.append([pred, f.sid])
 
     #import pdb; pdb.set_trace()    

@@ -161,6 +161,9 @@ class Process(VocabBase):
     def label(self):
         return self.name
         
+    def class_name(self):
+        return "Process"
+        
     def output_events(self):
         return self.events.filter(action__resource_effect="increment")
         
@@ -215,6 +218,9 @@ class EconomicResource(VocabBase):
         
     def label(self):
         return self.name
+    
+    def class_name(self):
+        return "Resource"
         
     def where_from(self):
         return self.events.filter(action__resource_effect="increment")
@@ -427,6 +433,9 @@ class EconomicEvent(VocabBase):
             ])
         else:
             return None
+            
+    def class_name(self):
+        return "EconomicEvent"
        
 
         

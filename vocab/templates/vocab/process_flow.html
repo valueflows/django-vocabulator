@@ -31,7 +31,8 @@
                     'height': 20,
                     'width': 20,
                     'background-fit': 'cover',
-                    'border-color': '#000',
+                    'border-color': 'green',
+                    'background-color': 'green',
                     'border-width': 3,
                     'border-opacity': 0.5,
                     'font-size': 30,
@@ -40,15 +41,36 @@
             .selector('edge')
                 .css({
                     'width': 6,
-                    'target-arrow-shape': 'triangle',
+                    'mid-target-arrow-shape': 'triangle-backcurve',
+                    'mid-target-arrow-scale': 20,
                     'line-color': '#ffaaaa',
-                    'target-arrow-color': '#ffaaaa'
+                    'mid-target-arrow-color': '#000'
+                })
+            .selector('node[class="Process"]')
+                .css({
+                    'shape': 'ellipse',
+                    'height': 20,
+                    'width': 30,
+                    'border-color': 'blue',
+                    'background-color': 'blue'
+                })
+            .selector('node[class="Resource"]')
+                .css({
+                    'shape': 'rectangle',
+                    'border-color': 'green',
+                    'background-color': 'green',
+                })
+            .selector( 'node[class="EconomicEvent"]')
+                .css({
+                    'shape': 'diamond',
+                    'border-color': 'orange',
+                    'background-color': 'orange',
                 }),
 
         elements: {
             nodes: [
                 {% for node in nodes %}
-                    { data: {id: "{{ node.sid }}", label: "{{ node.label }}" } },
+                    { data: {id: "{{ node.sid }}", label: "{{ node.label }}", class: "{{ node.class_name }}" } },
                 {% endfor %}
             ],
             edges: [
