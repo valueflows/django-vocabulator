@@ -170,6 +170,18 @@ class Process(VocabBase):
     def input_events(self):
         return self.events.exclude(action__resource_effect="increment")
         
+    def next(self):
+        return self.output_events()
+        
+    def preds(self):
+        return self.input_events()
+        
+    def process_resource_next(self):
+        return [evt.resource for evt in self.output_events() if evt.resource]
+        
+    def process_resource_preds(self):
+        return [evt.resource for evt in self.input_events() if evt.resource]
+        
     def previous_processes(self):
         inputs = self.input_events()
         processes = []
@@ -206,23 +218,17 @@ class Process(VocabBase):
             
     def process_resource_flow(self):
         #starting with self
-        self.next = []
         flows = [self,]
         self.process_resource_flow_dfs(flows)
         return flows
         
     def process_resource_flow_dfs(self, flows):
         resources = [evt.resource for evt in self.output_events() if evt.resource]
-        #import pdb; pdb.set_trace()
         for resource in resources:
-            resource.next = []
-            self.next.append(resource)
             flows.append(resource)
             processes = [evt.process for evt in resource.where_to() if evt.process]
             for process in processes:
-                resource.next.append(process)
                 flows.append(process)
-                process.next = []
                 process.process_resource_flow_dfs(flows)
             
 
@@ -235,7 +241,6 @@ def process_flows():
     return flows
     
 def process_resource_flows():
-    #import pdb; pdb.set_trace()
     processes = Process.objects.all()
     roots = [p for p in processes if not p.previous_processes()]
     flows = {}
@@ -280,59 +285,45 @@ class EconomicResource(VocabBase):
     def where_to(self):
         return self.events.exclude(action__resource_effect="increment")
         
+    def next(self):
+        return self.where_to()
+        
+    def preds(self):
+        return self.where_from()
+        
+    def process_resource_next(self):
+        return [evt.process for evt in self.where_to() if evt.process]
+    
+    def process_resource_preds(self):
+        return [evt.process for evt in self.where_from() if evt.process]
+        
     def incoming_flows(self):
         flows = []
         visited = set()
         visited.add(self)
         depth = 0
         self.depth = depth
-        self.next = []
-        self.preds = []
         flows.append(self)
         self.incoming_flows_dfs(flows, visited, depth)
         return flows
         
     def incoming_flows_dfs(self, flows, visited, depth):
-        #if self.name == "Piezo buzzer pump bottom":
-        #    import pdb; pdb.set_trace() 
         for event in self.where_from():
-            #if event not in visited: 
-            event.next = []
-            event.preds = []
             event.depth = self.depth + 1
-            event.next.append(self)
-            self.preds.append(event)
             visited.add(event)
             flows.append(event)
             process = event.process
-            #if process and process not in visited:
-            # problem: does not allow multiple outputs
             if process:
-                process.next = []
-                process.preds = []
                 process.depth = event.depth + 1
-                
-                process.next.append(event)
-                event.preds.append(process)
                 visited.add(process)
                 flows.append(process)
                 for inp in process.input_events():
-                    #if inp not in visited:
-                    inp.next = []
-                    inp.preds = []
                     inp.depth = process.depth + 1
-                    inp.next.append(process)
-                    process.preds.append(inp)
                     visited.add(inp)
                     flows.append(inp)
                     resource = inp.resource
-                    #if resource and resource not in visited:
                     if resource:
-                        resource.next = []
-                        resource.preds = []
                         resource.depth = inp.depth + 1
-                        resource.next.append(inp)
-                        inp.preds.append(resource)
                         visited.add(resource)
                         flows.append(resource)
                         resource.incoming_flows_dfs(flows, visited, depth)
@@ -341,10 +332,9 @@ class EconomicResource(VocabBase):
         from toposort import toposort_flatten
         flows = self.incoming_flows()
         data = {}
-        #import pdb; pdb.set_trace()
         for f in flows:
-            if f.preds:
-                data[f] = set(f.preds)
+            if f.preds():
+                data[f] = set(f.preds())
             else:
                 data[f] = set()
         return toposort_flatten(data)
@@ -489,11 +479,27 @@ class EconomicEvent(VocabBase):
                 self.provider.name,
                 self.action.label,
             ])
-            #return None
             
     def class_name(self):
         return "EconomicEvent"
-       
+        
+    def preds(self):
+        if self.action.resource_effect == "increment":
+            return [self.process,]
+        else:
+            if self.resource:
+                return [self.resource,]
+            else:
+                return []
+        
+    def next(self):
+        if self.action.resource_effect == "increment":
+            if self.resource:
+                return [self.resource,]
+            else:
+                return []
+        else:
+            return [self.process,]
 
         
         
