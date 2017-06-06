@@ -231,22 +231,6 @@ class Process(VocabBase):
                 flows.append(process)
                 process.process_resource_flow_dfs(flows)
             
-
-def process_flows():
-    processes = Process.objects.all()
-    roots = [p for p in processes if not p.previous_processes()]
-    flows = {}
-    for r in roots:
-        flows[r] = r.process_flow()
-    return flows
-    
-def process_resource_flows():
-    processes = Process.objects.all()
-    roots = [p for p in processes if not p.previous_processes()]
-    flows = {}
-    for r in roots:
-        flows[r] = r.process_resource_flow()
-    return flows
         
 @python_2_unicode_compatible
 class EconomicResource(VocabBase):

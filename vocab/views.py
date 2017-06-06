@@ -309,19 +309,21 @@ def process_flow(request):
     })
     
 def process_resource_flow(request):
-    flows = process_resource_flows()
-    roots = flows.keys()
-    flows = flows.values()
+    processes = Process.objects.all()
+    roots = [p for p in processes if not p.previous_processes()]
+    flows = []
+    for r in roots:
+        flows.extend(r.process_resource_flow())
+    flows = list(set(flows))
     nodes = []
     edges = []
     #import pdb; pdb.set_trace()
-    for flow in flows:
-        for f in flow:
-            f.sid = f.class_name() + str(f.id)
-            nodes.append(f)
-            for n in f.process_resource_next():
-                n.sid = n.class_name() + str(n.id) 
-                edges.append([f.sid, n.sid])
+    for f in flows:
+        f.sid = f.class_name() + str(f.id)
+        nodes.append(f)
+        for node in f.process_resource_next():
+            node.sid = node.class_name() + str(node.id) 
+            edges.append([f.sid, node.sid])
     return render(request, "vocab/process_flow.html", {
         "nodes": nodes,
         "edges": edges,
@@ -329,19 +331,20 @@ def process_resource_flow(request):
     })
 
 def processes_only(request):
-    flows = process_flows()
-    roots = flows.keys()
-    flows = flows.values()
+    processes = Process.objects.all()
+    roots = [p for p in processes if not p.previous_processes()]
+    flows = []
+    for r in roots:
+        flows.extend(r.process_flow())
     nodes = []
     edges = []
     #import pdb; pdb.set_trace()
-    for flow in flows:
-        for f in flow:
-            f.sid = f.class_name() + str(f.id)
-            nodes.append(f)
-            for p in f.next_processes():
-                next = p.class_name() + str(p.id)
-                edges.append([f.sid, next])
+    for f in flows:
+        f.sid = f.class_name() + str(f.id)
+        nodes.append(f)
+        for proc in f.next_processes():
+            next = proc.class_name() + str(proc.id)
+            edges.append([f.sid, next])
     return render(request, "vocab/process_flow.html", {
         "nodes": nodes,
         "edges": edges,
