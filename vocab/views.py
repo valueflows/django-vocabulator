@@ -122,7 +122,7 @@ def agents(request, format='json-ld'):
             elif agent.agent_subclass == "Organization":
                 org_ns = Namespace("http://www.w3.org/ns/org#")
                 store.add((ref, RDF.type, org_ns.Organization)) 
-            store.add((ref, vf_ns["name"], Literal(agent.name, lang="en")))
+            store.add((ref, vf_ns["name"], Literal(agent.name)))
             #todo: image, url, primaryLocation, note
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
@@ -146,7 +146,7 @@ def agent(request, agent_id, format='json-ld'):
         elif agent.agent_subclass == "Organization":
             org_ns = Namespace("http://www.w3.org/ns/org#")
             store.add((ref, RDF.type, org_ns.Organization)) 
-        store.add((ref, vf_ns["name"], Literal(agent.name, lang="en")))
+        store.add((ref, vf_ns["name"], Literal(agent.name)))
         ser = store.serialize(format=format, context=context, indent=4)
     #import pdb; pdb.set_trace()
     content_type = CONTENT_TYPES[format]
