@@ -67,7 +67,7 @@ def get_lod_setup_items():
         "image": { "@id": "vf:image", "@type": "@id" },
         #"displayName": "vf:displayName",
         #"displayNameMap": { "@id": "displayName", "@container": "@language" },
-        "Relationship": "vf:Relationship",
+        "AgentRelationship": "vf:AgentRelationship",
         "subject": { "@id": "vf:subject", "@type": "@id" },
         "object": { "@id": "vf:object", "@type": "@id" },
         "relationship": { "@id": "vf:relationship", "@type": "@id" },
