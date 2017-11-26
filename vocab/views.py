@@ -274,8 +274,8 @@ def incoming(request):
     flows = end.incoming_flows()
     for f in flows:
         f.sid = f.class_name() + str(f.id)
-        if f.next:
-            for n in f.next:
+        if f.next():
+            for n in f.next():
                 f.parent = n.class_name() + str(n.id)
         else:
             f.parent = "#"
