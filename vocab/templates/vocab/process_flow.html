@@ -18,7 +18,8 @@
 <div id="cy"></div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.1/cytoscape.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.12/cytoscape.min.js"></script>
+
 <script type="text/javascript">
     $(document).ready(function(){
 
@@ -83,6 +84,7 @@
         layout: {
             name: 'breadthfirst',
             directed: true,
+            //roots: "{% for r in roots %} #{{ r.sid }}, {% endfor %}",
             roots: {% for r in roots %} "#{{ r.sid }}", {% endfor %}
             padding: 10
         }

@@ -76,14 +76,14 @@ class ProcessNeighborsTest(TestCase):
         def test_incoming_flows(self):
             ends = end_resources()
             end = ends[0]
-            flows = end.incoming_flows()
+            visited = set()
+            flows = end.incoming_flows(visited)
             self.assertEqual(len(flows), 7)
             roots = [f for f in flows if not f.next()]
             self.assertEqual(len(roots), 1)
             root = roots[0]
             self.assertEqual(root, end)
             
-            #import pdb; pdb.set_trace()
             this = flows[len(flows)-1]
             next = this.next()[0]
             while next:
@@ -100,7 +100,6 @@ class ProcessNeighborsTest(TestCase):
             end = ends[0]
             topo = end.topological_sorted_inflows()
             component_process = Process.objects.get(name="Create Component")
-            #import pdb; pdb.set_trace()
             self.assertEqual(topo[0], component_process)
    
 

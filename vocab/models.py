@@ -204,32 +204,40 @@ class Process(VocabBase):
         processes = list(set(processes))
         return processes
         
-    def process_flow(self):
+    def process_flow(self, visited):
         #starting with self
+        visited.add(self)
         flows = [self,]
-        self.process_flow_dfs(flows)
+        self.process_flow_dfs(flows, visited)
         return flows
         
-    def process_flow_dfs(self, flows):
+    def process_flow_dfs(self, flows, visited):
         next = self.next_processes()
-        for n in next:
-            flows.append(n)
-            n.process_flow_dfs(flows)
+        for nxt in next:
+            if nxt not in visited:
+                visited.add(nxt)
+                flows.append(nxt)
+                nxt.process_flow_dfs(flows, visited)
             
-    def process_resource_flow(self):
+    def process_resource_flow(self, visited):
         #starting with self
+        visited.add(self)
         flows = [self,]
-        self.process_resource_flow_dfs(flows)
+        self.process_resource_flow_dfs(flows, visited)
         return flows
         
-    def process_resource_flow_dfs(self, flows):
+    def process_resource_flow_dfs(self, flows, visited):
         resources = [evt.resource for evt in self.output_events() if evt.resource]
         for resource in resources:
-            flows.append(resource)
-            processes = [evt.process for evt in resource.where_to() if evt.process]
-            for process in processes:
-                flows.append(process)
-                process.process_resource_flow_dfs(flows)
+            if resource not in visited:
+                visited.add(resource)
+                flows.append(resource)
+                processes = [evt.process for evt in resource.where_to() if evt.process]
+                for process in processes:
+                    if process not in visited:
+                        visited.add(process)
+                        flows.append(process)
+                        process.process_resource_flow_dfs(flows, visited)
             
         
 @python_2_unicode_compatible
@@ -281,9 +289,9 @@ class EconomicResource(VocabBase):
     def process_resource_preds(self):
         return [evt.process for evt in self.where_from() if evt.process]
         
-    def incoming_flows(self):
+    def incoming_flows(self, visited):
+        #import pdb; pdb.set_trace() 
         flows = []
-        visited = set()
         visited.add(self)
         depth = 0
         self.depth = depth
@@ -293,28 +301,33 @@ class EconomicResource(VocabBase):
         
     def incoming_flows_dfs(self, flows, visited, depth):
         for event in self.where_from():
-            event.depth = self.depth + 1
-            visited.add(event)
-            flows.append(event)
-            process = event.process
-            if process:
-                process.depth = event.depth + 1
-                visited.add(process)
-                flows.append(process)
-                for inp in process.input_events():
-                    inp.depth = process.depth + 1
-                    visited.add(inp)
-                    flows.append(inp)
-                    resource = inp.resource
-                    if resource:
-                        resource.depth = inp.depth + 1
-                        visited.add(resource)
-                        flows.append(resource)
-                        resource.incoming_flows_dfs(flows, visited, depth)
+            if event not in visited:
+                event.depth = self.depth + 1
+                visited.add(event)
+                flows.append(event)
+                process = event.process
+                if process:
+                    if process not in visited:
+                        process.depth = event.depth + 1
+                        visited.add(process)
+                        flows.append(process)
+                        for inp in process.input_events():
+                            if inp not in visited:
+                                inp.depth = process.depth + 1
+                                visited.add(inp)
+                                flows.append(inp)
+                                resource = inp.resource
+                                if resource:
+                                    if resource not in visited:
+                                        resource.depth = inp.depth + 1
+                                        visited.add(resource)
+                                        flows.append(resource)
+                                        resource.incoming_flows_dfs(flows, visited, depth)
                                 
     def topological_sorted_inflows(self):
         from toposort import toposort_flatten
-        flows = self.incoming_flows()
+        visited = set()
+        flows = self.incoming_flows(visited)
         data = {}
         for f in flows:
             if f.preds():

@@ -269,9 +269,9 @@ def processes(request, format='json-ld'):
     return HttpResponse(ser, content_type=content_type)
 
 def incoming(request):
-    ends = end_resources()
-    end = ends[0]
-    flows = end.incoming_flows()
+    end = EconomicResource.objects.get(id=4)
+    visited = set()
+    flows = end.incoming_flows(visited)
     for f in flows:
         f.sid = f.class_name() + str(f.id)
         if f.next():
@@ -285,10 +285,18 @@ def incoming(request):
     
 def process_flow(request):
     # includes processes, resources and events
-    ends = end_resources()
-    end = ends[0]
-    nodes = [f for f in end.incoming_flows() if f.label()]
-    nodes = list(set(nodes))
+    #ends = end_resources()
+    #end = ends[0]
+    #nodes = [f for f in end.incoming_flows() if f.label()]
+    nodes = []
+    #temp hack
+    end = EconomicResource.objects.get(id=4)
+    ends = [end,]
+    #import pdb; pdb.set_trace() 
+    visited = set()
+    for end in ends:
+        nodes.extend([f for f in end.incoming_flows(visited) if f.label()])
+    #nodes = list(set(nodes))
     #nodes = end.incoming_flows()
     edges = []
     #import pdb; pdb.set_trace()
@@ -298,8 +306,12 @@ def process_flow(request):
             if p.label():
                 pred = p.class_name() + str(p.id)
                 edges.append([pred, f.sid])
-    roots = [n for n in nodes if not n.preds()]
-    roots = [r for r in roots if not r.class_name() == "EconomicEvent"]
+    #roots = [n for n in nodes if not n.preds()]
+    #roots = [r for r in roots if not r.class_name() == "EconomicEvent"]
+    #temp hack
+    f = EconomicResource.objects.get(id=5)
+    f.sid = f.class_name() + str(f.id)
+    roots = [f,]
     
     #import pdb; pdb.set_trace()    
     return render(request, "vocab/process_flow.html", {
@@ -307,13 +319,49 @@ def process_flow(request):
         "edges": edges,
         "roots": roots,
     })
+
+def egg2worm_flow(request):
+    # includes processes, resources and events
+    nodes = []
+    ends = [
+        EconomicResource.objects.get(name="Meringue"),
+        EconomicResource.objects.get(name="Compost"),
+        EconomicResource.objects.get(name="Egg Yolk"),
+        ] 
+    
+    visited = set()
+    for end in ends:
+        nodes.extend([f for f in end.incoming_flows(visited) if f.label()])
+    
+    edges = []
+    for f in nodes:
+        f.sid = f.class_name() + str(f.id)
+        for p in f.preds():
+            if p.label():
+                pred = p.class_name() + str(p.id)
+                edges.append([pred, f.sid])
+                
+    f = EconomicResource.objects.get(name="Egg")
+    f.sid = f.class_name() + str(f.id)
+    roots = [f,]
+    
+    return render(request, "vocab/process_flow.html", {
+        "nodes": nodes,
+        "edges": edges,
+        "roots": roots,
+    })
     
 def process_resource_flow(request):
-    processes = Process.objects.all()
-    roots = [p for p in processes if not p.previous_processes()]
+    #processes = Process.objects.all()
+    #roots = [p for p in processes if not p.previous_processes()]
     flows = []
+    #if len(roots) > 1:
+    #    roots = [roots[1],]
+    #import pdb; pdb.set_trace()
+    roots = [Process.objects.get(id=1),]
+    visited= set()
     for r in roots:
-        flows.extend(r.process_resource_flow())
+        flows.extend(r.process_resource_flow(visited))
     flows = list(set(flows))
     nodes = []
     edges = []
@@ -331,11 +379,13 @@ def process_resource_flow(request):
     })
 
 def processes_only(request):
-    processes = Process.objects.all()
-    roots = [p for p in processes if not p.previous_processes()]
+    #processes = Process.objects.all()
+    #roots = [p for p in processes if not p.previous_processes()]
     flows = []
+    roots = [Process.objects.get(id=1),]
+    visited= set()
     for r in roots:
-        flows.extend(r.process_flow())
+        flows.extend(r.process_flow(visited))
     nodes = []
     edges = []
     #import pdb; pdb.set_trace()
